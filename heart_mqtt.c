@@ -21,7 +21,7 @@ void messageArrived(MQTT::MessageData& md) {
     // char* generated;
     // salted_id = strtok(charMessage, "-");
     // generated = strtok(NULL, "-");
-    printf("reset bpm to 0");
+    printf("reset bpm to 0\n");
     bpm = 0;
     printf("%s\n", charMessage);
 }
@@ -68,20 +68,22 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     printf("set up client\n");
-    /*
+    
     char topicBuffer[128];
     sprintf(topicBuffer, "Group3Pace");
     if ((rc = client.subscribe(topicBuffer, MQTT::QOS0, messageArrived)) != 0) {
         printf("Subscribe Error");
         return -1;
     }
-    */
+    
     printf("successfully subscribed to Group3Pace\n");
     
     char topicBuffer2[128];
     sprintf(topicBuffer2, "Group3Heart");
     //printf("%s\n", topicBuffer2);
     printf("before while loop\n");
+    Countdown cd;
+    Countdown cd_bp;
     while (1) {
 
         bpm = rand()%7;
@@ -89,7 +91,11 @@ int main(int argc, char* argv[]) {
         while (bpm > 0) {
             printf("bpm loop\n");
             bpm--;
-            wait(1);
+            cd_bp.countdown(1);
+            while(cd_bp.expired() == false) {
+            }
+            client.yield(5);
+            //wait(1);
         }
         printf("gets past bpm wait\n");
         char buf[100];
@@ -106,9 +112,11 @@ int main(int argc, char* argv[]) {
             printf("Publish Error");
             return -1;
         }
-
-        client.yield(5);
-        wait(5);
+        cd.countdown(5);
+        while(cd.expired() == false) {
+        }
+        //client.yield(5);
+        //wait(5);
         
     }
     wifi.disconnect();
